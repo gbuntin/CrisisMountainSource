@@ -1,0 +1,1063 @@
+*LST OFF
+*
+*         MOUNTAIN
+*        PAGE AND
+*        G PROGRAM
+*
+*        82 BY
+*        H. SCHROEDER
+*
+*
+HLIN     EQU $AD62
+HCLR     EQU $AC1A
+HPOSN    EQU $AC39
+DRAW     EQU $AE29
+HCOLOR   EQU $E4
+DRAWTO   EQU $E6
+RANDOM   EQU $880
+PAGE     EQU $800
+         ORG $4000
+FREEZE   EQU $8C2
+*
+*
+BEGIN    NOP 
+         LDA #1
+         STA $E7
+         LDA #$08
+         LDX #$05
+         LDY #$04
+         JSR $B000
+         LDA $C054
+         LDA $C051
+         LDY #6
+         STY TEMP
+LOOPB    LDY TEMP
+         LDA SECTOR,Y
+         TAX 
+         LDA LOC,Y
+         STA TEMPA
+         LDA TRACK,Y
+         LDY TEMPA
+         JSR $B000
+         DEC TEMP
+         BPL LOOPB
+         LDA #$20
+         STA DRAWTO
+         LDA #0
+         JSR HCLR
+         LDA $C052
+         LDA $C057
+         LDA $C050
+         LDX #5
+         STX TEMPA
+         JMP II
+*
+COUNTER  HEX 00
+COUNTER5 HEX 00
+*
+GRIDHIX  HEX 00000000
+         HEX 000000
+         HEX 000000
+*
+GRIDLOX  HEX 000000
+         HEX 000000
+         HEX 000000
+*
+GRIDVALY HEX 00000000
+         HEX 000000
+         HEX 000000
+*
+STARTLOX HEX ACA6B69CBE92
+*
+DELTAL   HEX 000001FF01FE
+*
+DELTAR   HEX 0100010002FF
+*
+SHPINDEX HEX 2418180A2400
+*
+*
+*
+TEMP     HEX 00
+TEMPA    HEX 00
+TEMPB    HEX 00
+TEMPC    HEX 00
+TEMPD    HEX 00
+*
+*
+*
+SHPDATA  HEX 03010787818709070100
+         HEX 0701818781030686
+         HEX 838604050900
+         HEX 010787810107878101070100
+         HEX 03010484818486890906
+         HEX 090700
+*
+II       LDX #2
+         JSR FREEZE
+         LDA #0
+         STA COUNTER
+         STA COUNTER5
+         LDY #9
+AA       STA GRIDHIX,Y
+         DEY 
+         BPL AA
+         LDA #$0E
+         LDY #1
+CC       LDX #2
+BB       STA GRIDVALY,Y
+         INY 
+         DEX 
+         BPL BB
+         CPY #$0A
+         BEQ DD
+         CLC 
+         ADC #1
+         JMP CC
+DD       LDY #9
+FF       LDX TEMPA
+         LDA STARTLOX,X
+         LDX #2
+EE       STA GRIDLOX,Y
+         SEC 
+         SBC #2
+         DEY 
+         DEX 
+         BPL EE
+         TYA 
+         BNE FF
+         LDA #$D5
+         STA HCOLOR
+GG       JSR LETTER
+         INC COUNTER
+         LDA COUNTER
+         CMP #44
+         BNE UU
+         JMP DOWHITE
+UU       INC COUNTER5
+         LDX TEMPA
+         LDY #1
+         JSR XX
+         LDY #4
+         JSR XX
+         LDY #7
+         JSR XX
+         LDY #3
+         JSR YY
+         LDY #6
+         JSR YY
+         LDY #9
+         JSR YY
+         JMP WW
+*
+XX       LDA GRIDLOX,Y
+         CLC 
+         ADC DELTAL,X
+         STA GRIDLOX,Y
+         RTS 
+*
+YY       LDA GRIDLOX,Y
+         CLC 
+         ADC DELTAR,X
+         STA GRIDLOX,Y
+         BNE VV
+         LDA GRIDHIX,Y
+         CLC 
+         ADC #1
+         STA GRIDHIX,Y
+VV       RTS 
+*
+WW       LDA COUNTER
+         AND #1
+         BNE JJ
+         DEC GRIDLOX+5
+JJ       LDX #9
+         INC GRIDVALY,X
+         DEX 
+         BPL JJ+2
+         LDA COUNTER5
+         CMP #3
+         BNE KK
+         INC GRIDVALY+7
+         INC GRIDVALY+8
+         INC GRIDVALY+9
+         JMP LL
+KK       CMP #5
+         BNE LL
+         LDA #0
+         STA COUNTER5
+         LDX #9
+         LDY #5
+MM       INC GRIDVALY,X
+         DEX 
+         DEY 
+         BPL MM
+LL       JMP GG
+*
+DOWHITE  LDA #$FF
+         STA HCOLOR
+         JSR LETTER
+         LDX #9
+HH       INC GRIDLOX,X
+         INC GRIDVALY,X
+         DEX 
+         BPL HH
+         JSR LETTER
+         DEC TEMPA
+         BMI OUT
+         JMP II
+*
+OUT      LDA #$20
+         STA $27
+         ORA #$60
+         STA $FF
+         LDA #$50
+         STA $26
+         STA $FE
+         LDA #$80
+         STA TEMPA
+         LDY #$27
+RLOOP    LDA ($FE),Y
+         STA ($26),Y
+         DEY 
+         BPL RLOOP
+         DEC TEMPA
+         BMI ROUT
+         JSR UP
+         LDA $26
+         STA $FE
+         LDA $27
+         ORA #$60
+         STA $FF
+         LDX #1
+         LDA #$60
+         JSR FREEZE+2
+         JMP RLOOP-2
+ROUT     JSR GRDLIN
+         JMP MANDISP
+*
+*
+LOX      HEX 07
+HIX      HEX 00
+VALY     HEX A4
+NBRJUMPS HEX 00
+DIRECTIO HEX 00
+MANSHAHI HEX 82
+MANSHALO HEX 0E
+MOMENTUM HEX 00
+KEY      HEX 00
+OLDVALY  HEX 00
+OLDXHI   HEX 00
+OLDXLO   HEX 00
+OLDMSHHI HEX 00
+CHGFLAG  HEX 00
+POSTURE  HEX 00
+SLSTATUS HEX 00
+DIGGING  HEX 00
+PREVMVT  HEX 01
+SHOVEL   HEX 01
+JUMPCNTR HEX 00
+FALLCNTR HEX 00
+YGOAL    HEX 00
+STRENGTH HEX 18
+*
+CREDITS  HEX 50A08050B070A0
+         HEX 58F8A06850E89068
+         HEX A0D06088C800706870C8
+*
+*
+FKPDL    HEX FF
+FKBTN    HEX 00
+FKKEY    HEX 00
+*
+CHGPDL   HEX 262F41437080
+HITBTN   HEX 162933424F5A90
+HITKEY   HEX A4AE
+ADDCDT   HEX 3A3B3C3D3E3F58
+         HEX 595A6365676A6E
+         HEX 6F999A9EA0A4AAADB3B8B9
+*
+*
+*
+NBRPDLCH HEX 05
+NBRHITBT HEX 06
+NBRHITKE HEX 01
+*
+MANINDEX HEX 00
+TIME     HEX 00
+*
+MANDISP  LDA TIME
+         AND #1
+         BEQ MANA
+         LDX NBRPDLCH
+CKPDL    LDA CHGPDL,X
+         CMP MANINDEX
+         BEQ DOCHGPDL
+         DEX 
+         BPL CKPDL
+         JMP MANA
+DOCHGPDL LDA FKPDL
+         EOR #$FF
+         STA FKPDL
+MANA     JSR CKCNTL
+         JSR DRAWMAN
+         LDA TIME
+         AND #1
+         BEQ DOCDT
+         LDX #$18
+CKCDT    LDA ADDCDT,X
+         CMP MANINDEX
+         BEQ MORECDT
+         DEX 
+         BPL CKCDT
+         JMP DOCDT
+MORECDT  LDA CDTC+1
+         CMP #$18
+         BEQ DOCDT
+         INC CDTC+1
+DOCDT    LDA #$58
+         STA $26
+         LDA #$32
+         STA $27
+         LDA #0
+         STA TEMPA
+CDTD     LDA #7
+         STA TEMPB
+CDTC     LDY #0
+         STY TEMPC
+CDTB     LDX TEMPC
+         LDA CREDITS,X
+         STA CDTA+1
+         LDX TEMPB
+CDTA     LDA $8900,X
+         STA ($26),Y
+         DEC TEMPC
+         DEY 
+         BPL CDTB
+         JSR UP
+         DEC TEMPB
+         BPL CDTC
+         DEC TEMPA
+         BMI CDTOUT
+         LDA TEMPD
+         SEC 
+         SBC #11
+         STA TEMPD
+         JMP CDTD
+CDTOUT   LDX #1
+         LDA #$78
+         JSR FREEZE+2
+         JSR ERASEMAN
+         LDA HIX
+         BEQ NOTEND
+         LDA LOX
+         CMP #$10
+         BNE NOTEND
+END      LDX #2
+         JSR FREEZE
+         JMP CDTLIN
+NOTEND   INC TIME
+         LDA TIME
+         AND #1
+         BNE NEA
+         INC MANINDEX
+NEA      JMP MANDISP
+*
+CDTLIN   JSR EGRDLIN
+         LDA #$2A
+         STA HCOLOR
+         LDX #$33
+         LDY #0
+         LDA #$A5
+         JSR HPOSN
+         LDX #3
+         STX TEMPB
+CDTLLIN  LDX TEMPB
+         LDA CDTLVALY,X
+         TAY 
+         LDA CDTLHIX,X
+         STA TEMPA
+         LDA CDTLLOX,X
+         LDX TEMPA
+         JSR HLIN
+         DEC TEMPB
+         BPL CDTLLIN
+         JMP HIDISP
+*
+*
+CDTLVALY HEX A59B9BA5
+CDTLHIX  HEX 00000000
+*
+HISCORE  EQU $8B00
+*
+*
+HIDISP   LDX #8
+         JSR FREEZE
+         LDA #$0D
+         STA TEMPD
+         LDA #$03
+         STA $26
+         LDA #$22
+         STA $27
+         LDX #4
+HILOOP   LDA HISCORE,X
+         STA HIDATA+8,X
+         DEX 
+         BPL HILOOP
+         LDA #1
+         STA TEMPA
+HID      LDA #7
+         STA TEMPB
+HIC      LDY #6
+         LDA TEMPD
+         STA TEMPC
+HIB      LDX TEMPC
+         LDA HIDATA,X
+         STA HIA+1
+         LDX TEMPB
+HIA      LDA $8900,X
+         STA ($26),Y
+         DEC TEMPC
+         DEY 
+         BPL HIB
+         JSR UP
+         DEC TEMPB
+         BPL HIC
+         DEC TEMPA
+         BMI HILINS
+         LDA TEMPD
+         SEC 
+         SBC #7
+         STA TEMPD
+         JMP HID
+*
+*
+HIDATA   HEX 8890D06000C870
+         HEX A00000000000A0
+*
+*
+*
+HILINS   LDA #$2A
+         STA HCOLOR
+         LDX #$11
+         LDY #0
+         LDA #$21
+         JSR HPOSN
+         LDX #3
+         STX TEMPB
+HILNLIN  LDX TEMPB
+         LDA HILNVALY,X
+         TAY 
+         LDA HILNHIX,X
+         STA TEMPA
+         LDA HILNLOX,X
+         LDX TEMPA
+         JSR HLIN
+         DEC TEMPB
+         BPL HILNLIN
+         JMP PDLMSG
+*
+*
+HILNVALY HEX 210F0F21
+HILNHIX  HEX 00000000
+HILNLOX  HEX 11114949
+*
+PDLMSG   LDX #8
+         JSR FREEZE
+CKPDLS   LDA $C061
+         BPL PDLYES
+         LDA $C062
+         BPL PDLYES
+         LDX #0
+         STX $C010
+         JSR DOPDLMSG
+WAITG    LDA $C000
+         BPL WAITG
+         CMP #$8D
+         BEQ CKPDLS
+         LDA $C010
+         JMP WAITG
+*
+*
+PDLYES   LDX #1
+         JSR FREEZE
+         LDX #1
+         JSR DOPDLMSG
+         LDX #1
+         JSR FREEZE
+         LDA #0
+         STA $845F
+         STA $855F
+         STA $8484
+         STA $8584
+WAIT     BIT $C061
+         BMI PUSHED
+         INC $340
+         BNE WAIT
+         INC $341
+         JMP WAIT
+PUSHED   LDA $C010
+         JMP CMP
+*
+*
+CMP      EQU $11C0
+*
+LETTER   LDX TEMPA
+         LDA SHPINDEX,X
+         STA TEMPB
+         TAX 
+         LDA SHPDATA,X
+         TAX 
+         LDA GRIDHIX,X
+         TAY 
+         LDA GRIDLOX,X
+         STA TEMPC
+         LDA GRIDVALY,X
+         LDX TEMPC
+         JSR HPOSN
+NN       INC TEMPB
+         LDX TEMPB
+         LDA SHPDATA,X
+         BEQ LTOUT
+         AND #$7F
+         TAX 
+         LDA GRIDVALY,X
+         TAY 
+         LDA GRIDHIX,X
+         STA TEMPC
+         LDA GRIDLOX,X
+         STA TEMPD
+         LDX TEMPB
+         LDA SHPDATA,X
+         BPL OO
+         INC TEMPD
+OO       LDA TEMPD
+         LDX TEMPC
+         JSR HLIN
+         JMP NN
+LTOUT    RTS 
+*
+* TABLES
+*
+SHAPES   HEX 0E2B4964
+*
+JFTABLE  HEX 00000101
+         HEX 01020203
+         HEX 04040506
+         HEX 080A0C0C
+         HEX 0C0C0C0C
+         HEX 0C0C0C0C
+*
+*
+BTSHAPES HEX 85AEC1E0
+*
+HNDBL    HEX 0020406080
+*
+*        CS
+*        ES
+*
+HGR2     EQU $AC00
+HGR      EQU $AC0A
+BGND     EQU $AC1C
+HPLOT    EQU $AC7F
+UP       EQU $ACFD
+DOWN     EQU $AD2C
+*
+ZTEMPALO EQU $FC
+ZTEMPAHI EQU $FD
+ZTEMPBLO EQU $FE
+ZTEMPBHI EQU $FF
+*
+ERASE    TXA 
+         STA EPT+1
+         LSR 
+         TAY 
+EWDTH    DEC $E5
+         BPL EWA
+         LDA #$27
+         STA $E5
+EWA      DEY 
+         BNE EWDTH
+EVLOOP   LDY $E5
+         LDA $26
+         STA ZTEMPBLO
+         LDA $27
+         ORA #$60
+         STA ZTEMPBHI
+EPT      LDX #00
+EHLOOP   LDA (ZTEMPBLO),Y
+         STA ($26),Y
+         INY 
+         CPY #$28
+         BNE EHA
+         LDY #0
+EHA      DEX 
+         BNE EHLOOP
+         DEC TEMPD
+         BEQ EEND
+         JSR UP
+         JMP EVLOOP
+EEND     RTS 
+*
+*
+*
+MOVEAHEA LDA DIRECTIO
+         BNE MOVERIGH
+MOVELEFT LDA LOX
+         BNE MLA
+         LDA HIX
+         BNE MLB
+         LDA #$17
+         STA LOX
+         INC HIX
+         JMP ADJSLIDE
+MLB      DEC HIX
+MLA      DEC LOX
+         JMP ADJSLIDE
+MOVERIGH INC LOX
+         LDA LOX
+         BEQ MRA
+         CMP #$18
+         BNE ADJSLIDE
+         LDA HIX
+         BEQ ADJSLIDE
+         LDA #0
+         STA LOX
+         STA HIX
+         JMP ADJSLIDE
+MRA      INC HIX
+ADJSLIDE LDA SLSTATUS
+         BEQ RR
+         AND #1
+         CMP DIRECTIO
+         BNE SS
+         INY 
+RR       RTS 
+SS       DEY 
+         RTS 
+*
+*
+OESHAPE  LDA LOX
+         LSR 
+         BCS ODDX
+         INX 
+ODDX     STX MANSHALO
+         RTS 
+*
+*
+*
+CKCNTL   LDA FALLCNTR
+         BNE FALLING
+         JMP CKJUMP
+FALLING  LDA VALY
+         CMP YGOAL
+         BEQ FOUT
+         LDA MOMENTUM
+         STA TEMPB
+         LDY FALLCNTR
+         LDA JFTABLE,Y
+         STA TEMPC
+FXLOOP   LDX TEMPB
+         BEQ FYLOOP
+         LDY YGOAL
+         JSR MOVEAHEA
+         STY YGOAL
+FXLOOPA  DEC TEMPB
+         LDA VALY
+         CMP YGOAL
+         BEQ FOUT
+FYLOOP   LDX TEMPC
+         BNE FYLOOPA
+         LDX TEMPB
+         BEQ FEND
+         JMP FXLOOP
+FYLOOPA  INC VALY
+         DEC TEMPC
+         LDA VALY
+         CMP YGOAL
+         BEQ FOUT
+         JMP FXLOOP
+FEND     INC FALLCNTR
+         LDX #$23
+         JSR OESHAPE
+         JMP CNTLOUT
+FOUT     NOP 
+FOUTA    LDA #0
+         STA FALLCNTR
+         JMP STANDSET
+CKJUMP   LDA JUMPCNTR
+         BNE JUMPING
+         JMP CONTROL
+JUMPING  TAX 
+         LDY JFTABLE,X
+         BEQ JYEND
+JLOOPY   DEC VALY
+         DEY 
+         BNE JLOOPY
+JYEND    LDX MOMENTUM
+         BEQ JEND
+JLOOPX   LDY YGOAL
+         JSR MOVEAHEA
+         STY YGOAL
+JEND     LDX #$23
+         JSR OESHAPE
+         LDA YGOAL
+         CMP VALY
+         BNE JENDA
+         LDA #0
+         STA JUMPCNTR
+         JMP FOUTA
+JENDA    DEC JUMPCNTR
+         BEQ JFALLING
+         JMP CNTLOUT
+JFALLING INC FALLCNTR
+         JMP CNTLOUT
+CONTROL  LDA TIME
+         AND #1
+         BEQ CHGPOST-3
+         LDX NBRHITKE
+CKHTKY   LDA HITKEY,X
+         CMP MANINDEX
+         BEQ CHGPOST
+         DEX 
+         BPL CKHTKY
+         JMP CKCNTLA
+CHGPOST  LDA #0
+         STA KEY
+         LDA POSTURE
+         BNE STANDSET
+CRAWLSET LDA SLSTATUS
+         BNE SCRAWLSE
+         LDA DIRECTIO
+SCRAWLSE CLC 
+         ADC #$84
+         STA MANSHAHI
+         LDA #2
+         STA POSTURE
+         LDA LOX
+         AND #1
+         TAX 
+         LDA SHAPES,X
+         STA MANSHALO
+         JMP CNTLOUT
+STANDSET INC CHGFLAG
+         INC CHGFLAG
+         INC CHGFLAG
+         LDA #$88
+         STA MANSHAHI
+         BNE SSB
+STANDSET LDA #$82
+         CLC 
+         ADC DIRECTIO
+         STA MANSHAHI
+SSB      LDA #0
+         STA PREVMVT
+         STA POSTURE
+         LDX #$0E
+         JSR OESHAPE
+         JMP CNTLOUT
+CKCNTLA  LDX NBRHITBT
+         LDA HITBTN,X
+         CMP MANINDEX
+         BEQ YESBTN
+         DEX 
+         BPL CKCNTLA+3
+         JMP CKLEFT
+YESBTN   LDA POSTURE
+         BNE DIG
+         JMP JUMPSET
+DIG      NOP 
+*
+         LDA #0
+         STA PREVMVT
+         INC DIGGING
+         LDA DIGGING
+         LSR 
+         BCC DIGEVEN
+         JMP DIGODD
+DIGEVEN  LDX #$46
+         JMP DIGC
+DIGODD   LDX #$68
+DIGC     JSR OESHAPE
+         LDA #$84
+         CLC 
+         ADC DIRECTIO
+         STA MANSHAHI
+         JMP CNTLOUT
+JUMPSET  LDA #9
+         STA JUMPCNTR
+         INC NBRJUMPS
+         LDA #$82
+         CLC 
+         ADC DIRECTIO
+         STA MANSHAHI
+         LDX #$23
+         JSR OESHAPE
+         LDA VALY
+         STA YGOAL
+         LDA #2
+         CMP NBRJUMPS
+         BNE MOMSETA
+         LDA #$9B
+         STA YGOAL
+MOMSETA  LDA PREVMVT
+         BEQ MOMSETB
+         LDA #1
+MOMSETB  STA MOMENTUM
+         JMP CNTLOUT
+CKLEFT   LDY FKPDL
+         CPY #$4C
+         BCS CKSTILL
+LEFT     LDA DIRECTIO
+         BNE CHGDIR
+         JMP MOVEA
+CKSTILL  CPY #$C2
+         BCS RIGHT
+         LDA POSTURE
+         BEQ CKMOVING
+         LDA #0
+         STA PREVMVT
+         JMP CNTLOUT
+CKMOVING LDA PREVMVT
+         BNE SETSTILL
+         JMP CNTLOUT
+SETSTILL JMP STANDSET
+RIGHT    LDA DIRECTIO
+         BNE MOVEA
+CHGDIR   LDA #0
+         STA PREVMVT
+         LDA #1
+         EOR DIRECTIO
+         STA DIRECTIO
+         LDA SLSTATUS
+         BEQ MMM
+         JMP CNTLOUT
+MMM      LDA POSTURE
+         BNE MMMM
+         LDX #$0E
+         JSR OESHAPE
+         LDA #$88
+         JMP NNN
+MMMM     LDA #$84
+         CLC 
+         ADC DIRECTIO
+NNN      STA MANSHAHI
+         JMP CNTLOUT
+MOVEA    LDA PREVMVT
+         BNE MOVEC
+         LDA SLSTATUS
+         BEQ MOVEF
+         LDA POSTURE
+         BNE MOVEB
+MOVEF    LDA POSTURE
+         ASL 
+         ADC #$80
+         ADC DIRECTIO
+         STA MANSHAHI
+MOVEB    LDA #3
+         EOR POSTURE
+         AND LOX
+         TAX 
+         LDA SHAPES,X
+         STA MANSHALO
+         INC PREVMVT
+         JMP CNTLOUT
+MOVEC    LDA CHGFLAG
+         BEQ MOVED
+         JMP CNTLOUT
+MOVED    LDY VALY
+         JSR MOVEAHEA
+         STY VALY
+         LDA #3
+         EOR POSTURE
+         AND LOX
+         TAX 
+         LDA SHAPES,X
+         STA MANSHALO
+         LDX POSTURE
+         BEQ MOVEE
+         INC CHGFLAG
+         INC CHGFLAG
+MOVEE    LDX STRENGTH
+         CPX #$18
+         BEQ VERT
+         INC CHGFLAG
+         INC CHGFLAG
+VERT     LDA LOX
+         CMP #$EA
+         BEQ FALLSET
+         JMP CNTLOUT
+FALLSET  LDA #5
+         STA FALLCNTR
+         LDA #$82
+         CLC 
+         ADC DIRECTIO
+         STA MANSHAHI
+         LDX #$23
+         JSR OESHAPE
+         LDA #$A4
+         STA YGOAL
+FMOMSETA LDX POSTURE
+         BNE FMOMSETB
+         INX 
+         BNE FMOMSETB+2
+FMOMSETB LDX #0
+         STX MOMENTUM
+CNTLOUT  RTS 
+*
+*
+ERASEMAN LDA CHGFLAG
+         BEQ EA
+         DEC CHGFLAG
+EA       LDX PAGE
+         LDA OLDMSHHI,X
+         AND #4
+         BNE ECRAWL
+         LDA #17
+         STA TEMPD
+         LDA #3
+         STA TEMPC
+         LDA #0
+         STA TEMPB
+         JMP EPOSN
+ECRAWL   LDA #5
+         STA TEMPC
+         LDA #19
+         STA TEMPD
+         LDA #0
+         STA TEMPB
+EPOSN    LDA OLDVALY,X
+         CLC 
+         ADC TEMPB
+         CMP #$C0
+         BCC EPOSNA
+         SEC 
+         SBC #$C0
+EPOSNA   STA TEMPB
+         LDA OLDXHI,X
+         TAY 
+         LDA OLDXLO,X
+         TAX 
+         LDA TEMPB
+         JSR HPOSN
+         LDX TEMPC
+         JSR ERASE
+         RTS 
+*
+ORLOX    HEX 00
+ORHIX    HEX 00
+*
+DRAWMAN  LDX PAGE
+         LDA LOX
+         STA OLDXLO,X
+         LDA HIX
+         STA OLDXHI,X
+         LDA VALY
+         STA OLDVALY,X
+         LDA MANSHAHI
+         STA OLDMSHHI,X
+         LDA #$7F
+         STA HCOLOR
+         LDY HIX
+         LDX LOX
+         LDA VALY
+         JSR HPOSN
+         LDX MANSHALO
+         LDY MANSHAHI
+         LDA #0
+         JSR DRAW
+         LDA #$FF
+         STA HCOLOR
+         LDX LOX
+         LDY HIX
+         LDA #12
+         STA TEMPA
+         LDA MANSHALO
+         AND #4
+         BEQ DAA
+         LSR TEMPA
+         LDA MANSHAHI
+         AND #2
+         BEQ DAA
+         LDA #8
+         STA TEMPA
+DAA      LDA VALY
+         SEC 
+         SBC TEMPA
+         JSR HPOSN
+         LDY MANSHAHI
+         LDA LOX
+         AND #1
+         EOR #1
+         TAX 
+         LDA #0
+         JSR DRAW
+         RTS 
+*
+*
+*
+MSGINDEX HEX 2142
+MSGDATA  HEX A0A0C0A8E080A090B8
+         HEX A06000B8D8C800A8A870C8D0A0
+         HEX D88870B8A0C870D8E0C8B8A0
+*
+*
+         HEX A0A0A0C0E0D088
+         HEX A058E0D800B8A0
+         HEX 00A0D800A058708090B8
+         HEX A0C0A850F8A0A0A0A0
+*
+DOPDLMSG LDA MSGINDEX,X
+         STA TEMPD
+         LDA #$D3
+         STA $26
+         LDA #$23
+         STA $27
+         LDA #0
+         STA TEMPA
+MSGD     LDA #7
+         STA TEMPB
+MSGC     LDY #$21
+         LDA TEMPD
+         STA TEMPC
+MSGB     LDX TEMPC
+         LDA MSGDATA,X
+         STA MSGA+1
+         LDX TEMPB
+MSGA     LDA $8900,X
+         STA ($26),Y
+         DEC TEMPC
+         DEY 
+         BPL MSGB
+         JSR UP
+         DEC TEMPB
+         BPL MSGC
+         DEC TEMPA
+         BMI MXOUT
+         LDA TEMPD
+         SEC 
+         SBC #11
+         STA TEMPD
+         JMP MSGD
+MXOUT    RTS 
+*
+*
+*
+GRDLIN   LDA #$2A
+         STA HCOLOR
+         LDA #$A5
+         LDX #0
+         LDY #0
+         JSR HPOSN
+         LDA #$17
+         LDX #1
+         LDY #$A5
+         JSR HLIN
+         RTS 
+EGRDLIN  LDA #0
+         JMP GRDLIN+2
+*
+*
+TRACK    HEX 100F0E0A090607
+SECTOR   HEX 0F0F0F0F0F0F02
+LOC      HEX 03808C8B08A160
+         END 
