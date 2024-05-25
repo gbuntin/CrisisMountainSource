@@ -10,3 +10,7 @@ But I digress.... I never tried compiling these to see if they actually work, I'
 I have no right to these files, if the copyright owner asks I will remove them.
 
 I'm dropping them here as DOS txt files that I converted from Apple DOS 3.3 Disk .S files using CiderPress.
+
+I grabbed these so long ago I have no idea what track / sectors they ended up being on, and I'm pulling them off a random DSK file I created by using ADT to transfer from an Apple ][e to my Win 7 PC years ago.
+
+Someone should totally grab the WOZ copy of Crisis Mountain and run LifeSaver on it.  If I get ambitious I might try that. :)
